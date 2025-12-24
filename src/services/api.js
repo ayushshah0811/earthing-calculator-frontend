@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL
 
 export async function calculateEarthing(payload) {
   const response = await fetch(`${API_URL}/calculate`, {
@@ -10,7 +10,9 @@ export async function calculateEarthing(payload) {
   });
 
   if (!response.ok) {
-    throw new Error("Calculation failed");
+    const errorText = await response.text(); // 👈 IMPORTANT
+    console.error("Backend error:", errorText);
+    throw new Error(errorText);
   }
 
   return response.json();

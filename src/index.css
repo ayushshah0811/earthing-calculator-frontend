@@ -85,6 +85,14 @@ th {
   font-weight: bold;
 }
 
+.earthing-type{
+  width: auto;
+}
+
+.earthing-type-selector{
+  text-align: center;
+}
+
 /* ===== FORCE SUMMARY ON NEW PAGE ===== */
 .results-page {
   margin-top: 40px;
@@ -112,6 +120,29 @@ input, select {
 .calculate-container button {
   padding: 8px 25px;
   font-size: 16px;
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ccc;
+  border-top: 3px solid #007bff; /* theme color */
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .acceptable {
