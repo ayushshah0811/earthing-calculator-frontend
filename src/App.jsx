@@ -183,24 +183,6 @@ export default function App() {
       const html2pdf = (await import("html2pdf.js")).default;
       const element = document.getElementById("pdf-content");
     
-      const pdfOnlyEls = document.querySelectorAll(".pdf-only");
-      const buttons = document.querySelectorAll(".calculate-container");
-    
-      // 1️⃣ Show PDF-only content
-      pdfOnlyEls.forEach(el => {
-        el.style.display = "block";
-      });
-    
-      // Hide buttons
-      buttons.forEach(btn => {
-        btn.style.visibility = "hidden";
-      });
-    
-      // 2️⃣ FORCE browser repaint
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      await new Promise(resolve => setTimeout(resolve, 0));
-    
-      // 3️⃣ Generate PDF AFTER repaint
       await html2pdf()
         .set({
           margin: [10, 10, 10, 10],
@@ -209,7 +191,19 @@ export default function App() {
           html2canvas: {
             scale: 3,
             useCORS: true,
-            logging: false
+            onclone: (clonedDoc) => {
+              // 🔥 THIS IS THE KEY
+    
+              // Show PDF-only content in CLONE
+              clonedDoc.querySelectorAll(".pdf-only").forEach(el => {
+                el.style.display = "block";
+              });
+    
+              // Hide buttons in CLONE
+              clonedDoc.querySelectorAll(".calculate-container").forEach(el => {
+                el.style.display = "none";
+              });
+            }
           },
           jsPDF: {
             unit: "mm",
@@ -219,17 +213,8 @@ export default function App() {
         })
         .from(element)
         .save();
-    
-      // 4️⃣ Restore UI
-      pdfOnlyEls.forEach(el => {
-        el.style.display = "none";
-      });
-    
-      buttons.forEach(btn => {
-        btn.style.visibility = "visible";
-      });
     };
-
+    
 return (
   <div className="page-container">
 

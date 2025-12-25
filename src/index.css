@@ -103,10 +103,25 @@ th {
   padding: 20px;
 }
 
-/* 🔥 THIS FIXES BORDER LEAK */
+/* THIS FIXES BORDER LEAK */
 
 .pdf-only{
   display: none;
+}
+
+.pdf-clone {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  /* MUST be real size */
+  width: 210mm;          /* A4 width */
+  background: white;
+
+  /* Invisible but rendered */
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .page-top-spacer {
@@ -187,6 +202,13 @@ table {
 
 tr {
   page-break-inside: avoid;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 
 @media (max-width: 768px) {
