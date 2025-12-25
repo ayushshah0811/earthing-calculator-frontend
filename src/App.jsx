@@ -171,79 +171,109 @@ export default function App() {
     setResults(response);
     setLoading(false);
   
-    requestAnimationFrame(() => {
-      resultsRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+      requestAnimationFrame(() => {
+        resultsRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
       });
-    });
-  };
+    };
   
-  const handleDownloadPDF = async () => {
-
-    const html2pdf = (await import("html2pdf.js")).default;
-    const element = document.getElementById("pdf-content");
-
-    // Hide buttons temporarily
-    const buttons = document.querySelectorAll("button");
-    buttons.forEach(btn => (btn.style.display = "none"));
-
-    const options = {
-      margin: [10, 10, 10, 10],
-      filename: "Earthing_Calculation.pdf",
-      image: { type: "jpeg", quality: 1 },
-      html2canvas: {
-        scale: 3,         
-        useCORS: true
-      },
-      jsPDF: {
-        unit: "mm",
-        format: "a4",
-        orientation: "portrait"
-      }
+    const handleDownloadPDF = async () => {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = document.getElementById("pdf-content");
+    
+      const pdfOnlyEls = document.querySelectorAll(".pdf-only");
+      const buttons = document.querySelectorAll(".calculate-container");
+    
+      // 1️⃣ Show PDF-only content
+      pdfOnlyEls.forEach(el => {
+        el.style.display = "block";
+      });
+    
+      // Hide buttons
+      buttons.forEach(btn => {
+        btn.style.visibility = "hidden";
+      });
+    
+      // 2️⃣ FORCE browser repaint
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      await new Promise(resolve => setTimeout(resolve, 0));
+    
+      // 3️⃣ Generate PDF AFTER repaint
+      await html2pdf()
+        .set({
+          margin: [10, 10, 10, 10],
+          filename: "Earthing_Calculation.pdf",
+          image: { type: "jpeg", quality: 1 },
+          html2canvas: {
+            scale: 3,
+            useCORS: true,
+            logging: false
+          },
+          jsPDF: {
+            unit: "mm",
+            format: "a4",
+            orientation: "portrait"
+          }
+        })
+        .from(element)
+        .save();
+    
+      // 4️⃣ Restore UI
+      pdfOnlyEls.forEach(el => {
+        el.style.display = "none";
+      });
+    
+      buttons.forEach(btn => {
+        btn.style.visibility = "visible";
+      });
     };
 
-    html2pdf()
-      .set(options)
-      .from(element)
-      .save()
-      .finally(() => {
-        buttons.forEach(btn => (btn.style.display = "inline-block"));
-      });
-  };
-
-  return (
-    <div className="page-container">
+return (
+  <div className="page-container">
 
     <div id="pdf-content">
+      <div className="pdf page">
+        <h1 className="title">
+          Earthing Calculation – As Per IS 3043
+        </h1>
 
-      <h1 className="title">
-        Earthing Calculation – IS 3043
-      </h1>
+        <DocumentHeader
+          headerData={headerData}
+          setHeaderData={setHeaderData}
+        />
 
-      <DocumentHeader
-        headerData={headerData}
-        setHeaderData={setHeaderData}
-      />
+        <EarthingTypeSelector
+          earthingType={earthingType}
+          setEarthingType={setEarthingType}
+        />
 
-      <EarthingTypeSelector
-        earthingType={earthingType}
-        setEarthingType={setEarthingType}
-      />
-
-      <InputTable
-        data={formData}
-        setData={setFormData}
-        earthingType={earthingType}
-      />
+        <InputTable
+          data={formData}
+          setData={setFormData}
+          earthingType={earthingType}
+        />
+      </div>
 
       {results && (
-        <ResultsTable
-          results={results}
-          resultsRef={resultsRef}
-        />
-      )}
+        <div className="pdf page">
+          {/* 🔹 Spacer prevents border bleed */}
+          <div className="page-top-spacer" />
+          <div className="pdf-only">
+            <DocumentHeader
+              headerData={headerData}
+              setHeaderData={setHeaderData}
+            />
+          </div>
 
+
+          <ResultsTable
+            results={results}
+            resultsRef={resultsRef}
+          />
+        </div>
+      )}
     </div>
 
     <div className="calculate-container">
