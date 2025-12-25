@@ -120,52 +120,47 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const handleCalculate = async () => {
 
-    setLoading(true);
     setResults(null);
-    
+  
     const requiredFields =
-    earthingType === "plate"
-      ? [...commonRequiredFields, ...plateRequiredFields]
-      : [...commonRequiredFields, ...pipeRequiredFields];
+      earthingType === "plate"
+        ? [...commonRequiredFields, ...plateRequiredFields]
+        : [...commonRequiredFields, ...pipeRequiredFields];
   
     const emptyField = requiredFields.find(
       key => formData[key] === "" || formData[key] === null
     );
-  
   
     if (emptyField) {
       alert("Please fill all required input fields before calculating.");
       const el = document.getElementById(emptyField);
       el?.scrollIntoView({ behavior: "smooth", block: "center" });
       el?.focus();
-  
-      return; // ❌ stop here
+      return;   // ✨ Now return is SAFE — loading was never set
     }
-
+  
+    // ---- move loading below validation ----
+    setLoading(true);
+  
     const payload = {
       earthing_type: earthingType,
-    
       earth_resistivity: Number(formData.earth_resistivity),
       fault_current: Number(formData.fault_current),
       fault_clearing_time: Number(formData.fault_clearing_time),
-    
       number_of_pits: Number(formData.number_of_pits),
-    
       strip_width_mm: Number(formData.strip_width_mm),
       strip_thickness_mm: Number(formData.strip_thickness_mm),
       number_of_strips: Number(formData.number_of_strips),
       strip_length_m: Number(formData.strip_length_m),
-    
       strip_material: formData.strip_material
     };
-    
-    // 👇 ONLY add geometry that applies
+  
     if (earthingType === "pipe") {
       payload.rod_diameter_mm = Number(formData.rod_diameter_mm);
       payload.rod_radius_m = Number(formData.rod_radius_m);
       payload.rod_length_m = Number(formData.rod_length_m);
     }
-    
+  
     if (earthingType === "plate") {
       payload.plate_length_mm = Number(formData.plate_length_mm);
       payload.plate_width_mm = Number(formData.plate_width_mm);
@@ -183,7 +178,7 @@ export default function App() {
       });
     });
   };
-
+  
   const handleDownloadPDF = async () => {
 
     const html2pdf = (await import("html2pdf.js")).default;
